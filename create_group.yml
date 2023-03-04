@@ -1,0 +1,32 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+
+  tasks:
+    - name: Ensure group "superusers" exists
+      ansible.builtin.group:
+        name: superusers
+        state: present
+
+    - name: Allow 'superusers' group to have passwordless sudo
+      lineinfile:
+        dest: /etc/sudoers
+        state: present
+        regexp: '^%superusers'
+        line: '%superusers ALL=(ALL) NOPASSWD: ALL'
+        validate: 'visudo -cf %s'
+
+    - name: Создание пользователя user2
+      ansible.builtin.user:
+        name: user2
+        groups: superusers
+        shell: /bin/bash
+    - name: Создание пользователя user3
+      ansible.builtin.user:
+        name: user3
+        groups: superusers
+        shell: /bin/bash
+
